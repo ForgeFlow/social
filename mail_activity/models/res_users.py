@@ -2,7 +2,6 @@
 # © 2018 Eficent Business and IT Consulting Services, S.L.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from openerp import api, fields, models, modules
-from .mail_activity_mixin import setup_mail_actitivities
 
 
 class ResUsers(models.Model):
@@ -12,11 +11,11 @@ class ResUsers(models.Model):
     def activity_user_count(self):
         query = """SELECT m.id, count(*), act.res_model as model,
                         CASE
-                            WHEN %(today)s::date - 
+                            WHEN %(today)s::date -
                             act.date_deadline::date = 0 Then 'today'
-                            WHEN %(today)s::date - 
+                            WHEN %(today)s::date -
                             act.date_deadline::date > 0 Then 'overdue'
-                            WHEN %(today)s::date - 
+                            WHEN %(today)s::date -
                             act.date_deadline::date < 0 Then 'planned'
                         END AS states
                     FROM mail_activity AS act
@@ -30,7 +29,7 @@ class ResUsers(models.Model):
         })
         activity_data = self.env.cr.dictfetchall()
         model_ids = [a['id'] for a in activity_data]
-        model_names = {n[0]:n[1] for n in self.env['ir.model'].browse(
+        model_names = {n[0]: n[1] for n in self.env['ir.model'].browse(
             model_ids).name_get()}
 
         user_activities = {}
@@ -46,7 +45,7 @@ class ResUsers(models.Model):
                 }
             user_activities[activity['model']][
                 '%s_count' % activity['states']] += activity['count']
-            if activity['states'] in ('today','overdue'):
+            if activity['states'] in ('today', 'overdue'):
                 user_activities[activity['model']][
                     'total_count'] += activity['count']
 
