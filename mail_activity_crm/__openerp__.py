@@ -10,6 +10,7 @@
     "summary": "Backport activities",
     "depends": [
         'mail_activity',
+        'mail_activity_calendar',
         'crm',
     ],
     "data": [

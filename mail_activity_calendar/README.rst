@@ -18,6 +18,13 @@ When you schedule an activity of category 'Meeting' you will be directed
 to the calendar.
 
 
+Known issues / Roadmap
+======================
+
+* When the user is redirected from the activity to the calendar view,
+  the summary of the activity will not be passed to
+
+
 Bug Tracker
 ===========
 
