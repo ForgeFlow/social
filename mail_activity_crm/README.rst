@@ -17,7 +17,13 @@ To use this module, you need to do the same as in 11.0.
 Known issues / Roadmap
 ======================
 
-* at the moment, this module only provides 11.0's data model, no UI
+* From the Kanban view you can only display the activities. You cannot
+  schedule new activities from the kanban pop-up window, and the layout is
+  slightly different.
+
+* The Kanban view shows the next activity date and summary, in red if it
+  is overdue.
+
 
 Bug Tracker
 ===========

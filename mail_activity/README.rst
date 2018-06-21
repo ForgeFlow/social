@@ -2,7 +2,7 @@
 Activities
 ==========
 
-This module is an attempt to backport activities from 11.0.
+This module backports the activities from 11.0.
 
 Configuration
 =============

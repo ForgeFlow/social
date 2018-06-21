@@ -22,7 +22,8 @@ Known issues / Roadmap
 ======================
 
 * When the user is redirected from the activity to the calendar view,
-  the summary of the activity will not be passed to
+  the summary of the activity does not appear in the pop-up window following
+  the creation of a new calendar event.
 
 
 Bug Tracker
