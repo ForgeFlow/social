@@ -1,2 +1,0 @@
-- Dixmit <https://dixmit.com>
-  - Enric Tobella

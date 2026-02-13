@@ -30,9 +30,7 @@ msgstr ""
 
 #. module: mass_mailing_unique
 #: model:ir.model.constraint,message:mass_mailing_unique.constraint_mailing_contact_unique_email
-msgid ""
-"There's already an existing mailing contact with this email address. \n"
-"Delete that existing record or change its email field value."
+msgid "There's already a contact with this email address"
 msgstr ""
 
 #. module: mass_mailing_unique

@@ -6,11 +6,6 @@
   * Ernesto Tejeda
   * Rafael Blasco
   * Alexandre Díaz
-  * Carlos Roca
-
-* XCG Consulting, part of `Orbeet <https://orbeet.io>`_:
-
-  * Vincent Hatakeyama
 
 * `Eezee-IT <https://www.eezee-it.com>`_:
   * Asma Elferkhsi

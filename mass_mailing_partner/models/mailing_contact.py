@@ -53,30 +53,37 @@ class MailingContact(models.Model):
             )
             self.country_id = self.partner_id.country_id
 
-    def _overwrite_partner(self, vals, creating=False):
-        """Overwrite partner and update contact data if needed."""
-        self.ensure_one()
-        if self.env.context.get("mass_mailing_partner_writing"):
-            return
-        _self = self.with_context(mass_mailing_partner_writing=True)
-        prev_partner = _self.partner_id
-        if "partner_id" not in vals:
-            _self._set_partner()
-        if creating or prev_partner != _self.partner_id:
-            _self._onchange_partner_mass_mailing_partner()
+    @api.model
+    def _get_contact_vals(self, origin_vals):
+        record = self.new(origin_vals)
+        if not record.partner_id:
+            record._set_partner()
+        record._onchange_partner_mass_mailing_partner()
+        new_vals = record._convert_to_write(record._cache)
+        new_vals.update(
+            subscription_list_ids=origin_vals.get("subscription_list_ids", []),
+            list_ids=origin_vals.get("list_ids", []),
+        )
+        if new_vals.get("partner_id") and "tag_ids" in new_vals:
+            # When there is a partner, tag_ids must get value from the compute function
+            # otherwise, its values will be different from partner
+            del new_vals["tag_ids"]
+        return new_vals
 
     @api.model_create_multi
     def create(self, vals_list):
-        result = super().create(vals_list)
-        for contact, vals in zip(result, vals_list):
-            contact._overwrite_partner(vals, True)
-        return result
+        new_vals_list = []
+        for vals in vals_list:
+            new_vals = self._get_contact_vals(vals)
+            new_vals_list.append(new_vals)
+        return super().create(new_vals_list)
 
     def write(self, vals):
-        result = super().write(vals)
         for contact in self:
-            contact._overwrite_partner(vals)
-        return result
+            origin_vals = contact.copy_data(vals)[0]
+            new_vals = self._get_contact_vals(origin_vals)
+            super(MailingContact, contact).write(new_vals)
+        return True
 
     def _get_categories(self):
         ca_ids = (
@@ -104,12 +111,8 @@ class MailingContact(models.Model):
         m_partner = self.env["res.partner"]
         # Look for a partner with that email
         email = self.email.strip()
-        if email == self.partner_id.email:
-            return
         partner = m_partner.search([("email", "=ilike", email)], limit=1)
         if partner:
-            if partner == self.partner_id:
-                return
             # Partner found
             self.partner_id = partner
         else:

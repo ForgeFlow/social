@@ -21,7 +21,6 @@ class TestMailActivityReminder(common.TransactionCase):
                 no_reset_password=True,
             )
         )
-        cls.Partner = cls.env["res.partner"]
         cls.ResUsers = cls.env["res.users"]
         cls.Company = cls.env["res.company"]
         cls.MailActivityType = cls.env["mail.activity.type"]
@@ -32,10 +31,8 @@ class TestMailActivityReminder(common.TransactionCase):
         cls.model_res_partner = cls.env["ir.model"].search(
             [("model", "=", "res.partner")], limit=1
         )
-        cls.partner_AcmeCorporation = cls.Partner.create(
-            {
-                "name": "Acme Corporation",
-            }
+        cls.partner_DecoAddict = cls.env["res.partner"].search(
+            [("name", "ilike", "Deco Addict")], limit=1
         )
 
     def test_none_reminders(self):
@@ -71,7 +68,7 @@ class TestMailActivityReminder(common.TransactionCase):
                 "summary": "Activity",
                 "activity_type_id": activity_type.id,
                 "res_model_id": self.model_res_partner.id,
-                "res_id": self.partner_AcmeCorporation.id,
+                "res_id": self.partner_DecoAddict.id,
                 "date_deadline": self.today,
                 "user_id": user.id,
             }
@@ -90,7 +87,7 @@ class TestMailActivityReminder(common.TransactionCase):
                     "summary": "Activity",
                     "activity_type_id": activity_type.id,
                     "res_model_id": self.model_res_partner.id,
-                    "res_id": self.partner_AcmeCorporation.id,
+                    "res_id": self.partner_DecoAddict.id,
                     "date_deadline": self.today + relativedelta(days=5),
                 }
             )
@@ -133,7 +130,7 @@ class TestMailActivityReminder(common.TransactionCase):
                     "summary": "Activity",
                     "activity_type_id": activity_type.id,
                     "res_model_id": self.model_res_partner.id,
-                    "res_id": self.partner_AcmeCorporation.id,
+                    "res_id": self.partner_DecoAddict.id,
                     "date_deadline": self.today + relativedelta(days=5),
                 }
             )
@@ -169,7 +166,7 @@ class TestMailActivityReminder(common.TransactionCase):
                     "summary": "Activity",
                     "activity_type_id": activity_type.id,
                     "res_model_id": self.model_res_partner.id,
-                    "res_id": self.partner_AcmeCorporation.id,
+                    "res_id": self.partner_DecoAddict.id,
                     "date_deadline": self.today + relativedelta(days=1),
                 }
             )
@@ -192,7 +189,7 @@ class TestMailActivityReminder(common.TransactionCase):
                     "summary": "Activity",
                     "activity_type_id": activity_type.id,
                     "res_model_id": self.model_res_partner.id,
-                    "res_id": self.partner_AcmeCorporation.id,
+                    "res_id": self.partner_DecoAddict.id,
                     "date_deadline": self.today + relativedelta(days=1),
                 }
             )

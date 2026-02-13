@@ -76,8 +76,10 @@ msgstr "Avoimet toimenpiteet"
 msgid "State"
 msgstr "Tila"
 
-#~ msgid "User"
-#~ msgstr "Käyttäjä"
+#. module: mail_activity_done
+#: model:ir.model,name:mail_activity_done.model_res_users
+msgid "User"
+msgstr "Käyttäjä"
 
 #, python-format
 #~ msgid "%d days overdue"

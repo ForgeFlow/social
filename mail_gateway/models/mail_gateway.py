@@ -1,6 +1,6 @@
 # Copyright 2024 Dixmit
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-from odoo import api, fields, models, tools
+from odoo import Command, api, fields, models, tools
 
 
 class MailGateway(models.Model):
@@ -25,10 +25,12 @@ class MailGateway(models.Model):
     )
     webhook_user_id = fields.Many2one(
         "res.users",
-        default=lambda self: self.env.ref("base.user_root"),
+        default=lambda self: self.env.user.id,
         help="User that will create the messages",
     )
-    member_ids = fields.Many2many("res.users")
+    member_ids = fields.Many2many(
+        "res.users", default=lambda self: [Command.link(self.env.user.id)]
+    )
     company_id = fields.Many2one(
         "res.company", default=lambda self: self.env.company.id
     )

@@ -100,21 +100,6 @@ class MailMessage(models.Model):
             "soft-bounced": "error",
         }
 
-    @api.model
-    def _tracking_mail_notification_get_status(self, notification):
-        """Map mail.notification states to be used in chatter"""
-        return (
-            "opened"
-            if notification.is_read
-            else {
-                "ready": "waiting",
-                "sent": "delivered",
-                "bounce": "error",
-                "exception": "error",
-                "canceled": "error",
-            }.get(notification.notification_status, "unknown")
-        )
-
     def _partner_tracking_status_get(self, tracking_email):
         """Determine tracking status"""
         tracking_status_map = self._tracking_status_map_get()
@@ -215,25 +200,6 @@ class MailMessage(models.Model):
                     email_cc_list.discard(partner.email)
                     isCc = True
                 tracking_status = tracking_unknown_values.copy()
-                # Search internal mail.notifications (for users using it)
-                # Note that by default, read notifications older than 180 days are
-                # deleted.
-                notification = message.notification_ids.filtered(
-                    lambda notification: notification.notification_type == "inbox"
-                    and notification.res_partner_id == partner
-                )
-                if notification:
-                    status = self._tracking_mail_notification_get_status(notification)
-                    tracking_status.update(
-                        {
-                            "status": status,
-                            "status_human": self._partner_tracking_status_human_get(
-                                status
-                            ),
-                            "error_type": notification.failure_type,
-                            "error_description": notification.failure_reason,
-                        }
-                    )
                 tracking_status.update(
                     {
                         "recipient": partner.name,
@@ -320,9 +286,7 @@ class MailMessage(models.Model):
         self.check_access_rule("read")
         self.write({"mail_tracking_needs_action": False})
         self.env["bus.bus"]._sendone(
-            self.env.user.partner_id,
-            "toggle_tracking_status",
-            {"message_ids": self.ids},
+            self.env.user.partner_id, "toggle_tracking_status", self.ids
         )
         return self.mail_tracking_needs_action
 
@@ -341,8 +305,13 @@ class MailMessage(models.Model):
         unreviewed_messages.write({"mail_tracking_needs_action": False})
         ids = unreviewed_messages.ids
 
-        self.env["bus.bus"]._sendone(
-            self.env.user.partner_id, "toggle_tracking_status", {"message_ids": ids}
+        self.env["bus.bus"].sendone(
+            (self._cr.dbname, "res.partner", self.env.user.partner_id.id),
+            {
+                "type": "toggle_tracking_status",
+                "message_ids": ids,
+                "needs_actions": False,
+            },
         )
 
         return ids

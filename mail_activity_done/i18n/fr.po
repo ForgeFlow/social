@@ -76,8 +76,10 @@ msgstr "Activités ouvertes"
 msgid "State"
 msgstr "État"
 
-#~ msgid "User"
-#~ msgstr "Utilisateur"
+#. module: mail_activity_done
+#: model:ir.model,name:mail_activity_done.model_res_users
+msgid "User"
+msgstr "Utilisateur"
 
 #, python-format
 #~ msgid "%d days overdue"

@@ -18,13 +18,7 @@ _logger = logging.getLogger(__name__)
 
 def format_emails(partners):
     emails = [
-        tools.formataddr(
-            (
-                p.name or "False",
-                p.email and tools.mail._normalize_email(p.email) or "False",
-            )
-        )
-        for p in partners
+        tools.formataddr((p.name or "False", p.email or "False")) for p in partners
     ]
     return ", ".join(emails)
 
@@ -54,8 +48,8 @@ class MailMail(models.Model):
         success_pids = []
         failure_type = None
         # ===== Same with native Odoo =====
-        # https://github.com/odoo/odoo/blob/55c165dc8777514afa4f1476b82ef6b50b8a7651
-        # /addons/mail/models/mail_mail.py#L463
+        # https://github.com/odoo/odoo/blob/d492bbde35d2b52e975ca252588f5529f07027aa
+        # /addons/mail/models/mail_mail.py#L461
         try:
             if mail.state != "outgoing":
                 if mail.state != "exception" and mail.auto_delete:
@@ -135,7 +129,7 @@ class MailMail(models.Model):
                 )
 
             # protect against ill-formatted email_from when formataddr was used on an already formatted email # noqa: B950
-            emails_from = tools.email_split_and_format_normalize(mail.email_from)
+            emails_from = tools.email_split_and_format(mail.email_from)
             email_from = emails_from[0] if emails_from else mail.email_from
 
             # build an RFC2822 email.message.Message object and send it without queuing
@@ -159,10 +153,7 @@ class MailMail(models.Model):
                 headers=email_headers,
             )
             try:
-                email_to_normalized = email.pop("email_to_normalized", [])
-                res = IrMailServer.with_context(
-                    send_validated_to=email_to_normalized
-                ).send_email(
+                res = IrMailServer.send_email(
                     msg,
                     mail_server_id=mail.mail_server_id.id,
                     smtp_session=smtp_session,
@@ -197,12 +188,9 @@ class MailMail(models.Model):
                     {"state": "sent", "message_id": res, "failure_reason": False}
                 )
                 _logger.info(
-                    "Mail with ID %r and Message-Id %r from %r to (redacted) %r "
-                    "successfully sent",
+                    "Mail with ID %r and Message-Id %r successfully sent",
                     mail.id,
                     mail.message_id,
-                    tools.email_normalize(msg["from"]),
-                    tools.mail.email_anonymize(tools.email_normalize(msg["to"])),
                 )
                 # /!\ can't use mail.state here, as mail.refresh() will cause an error
                 # see revid:odo@openerp.com-20120622152536-42b2s28lvdv3odyr in 6.1
@@ -262,8 +250,8 @@ class MailMail(models.Model):
         email_from = email.get("email_from")
         IrMailServer = env["ir.mail_server"]
         # ===== Same with native Odoo =====
-        # https://github.com/odoo/odoo/blob/1098b033b4e1811d6ff4b8c3b90aa6b9e697cb93
-        # /addons/mail/models/mail_mail.py#L550
+        # https://github.com/odoo/odoo/blob/d492bbde35d2b52e975ca252588f5529f07027aa
+        # /addons/mail/models/mail_mail.py#L543
         msg = IrMailServer.build_email(
             email_from=email_from,
             email_to=email.get("email_to"),
@@ -296,11 +284,4 @@ class MailMail(models.Model):
         res["email_to"] = format_emails(partner_to)
         res["email_cc"] = format_emails(self.recipient_cc_ids)
         res["email_bcc"] = format_emails(self.recipient_bcc_ids)
-        if res.get("email_to"):
-            res["email_to_normalized"] += tools.email_normalize_all(res["email_to"])
-        if res.get("email_cc"):
-            res["email_to_normalized"] += tools.email_normalize_all(res["email_cc"])
-        if res.get("email_bcc"):
-            res["email_to_normalized"] += tools.email_normalize_all(res["email_bcc"])
-        res["email_to_normalized"] = list(set(res["email_to_normalized"]))
         return res

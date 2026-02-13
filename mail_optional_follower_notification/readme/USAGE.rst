@@ -8,6 +8,3 @@ This field it's initialized to true to keep the standard behavior.
 
 .. figure:: static/description/optional_follower_002.png
    :alt: Checkbox to avoid to notify automatically followers
-
-.. figure:: static/description/optional_follower_003.png
-   :alt: Checkbox to set the default for the wizard
